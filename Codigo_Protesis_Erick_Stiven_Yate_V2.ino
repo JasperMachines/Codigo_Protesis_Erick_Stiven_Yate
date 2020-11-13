@@ -154,7 +154,7 @@ void loop() {
                                                //AL DETECTAR UNA LECTURA MAYOR SE EJECUTA EL NIVEL SIGUIENTE Y LA MUÑECA SE EXTIENDE
 
     constrain(posmun, 90, 180);
-    posmun += 5;
+    posMUN -= 5;
     
     muneca.write(posMUN);                       //POSICIONAMIENTO DE MUÑECA A LA ULTIMA REGISTRADA 
     
@@ -174,8 +174,8 @@ void loop() {
                                               //AL DETECTAR UNA LECTURA MENOR SE EJECUTA EL NIVEL ANTERIOR Y LA MUÑECA SE FLEXIONA
                                               //AL PERSISTIR EL NIVEL MAXIMO, LA MUÑECA LLEGA A SU PUNTO MAXIMO Y SE DETIENE
 
-    posmun += 5;
-    muneca.write(posmun);
+    posMUN += 5;
+    muneca.write(posMUN);
     
     analogWrite(redPin, 255);
     analogWrite(greenPin, 0);               //INDICADOR LED RGB EN ROJO
