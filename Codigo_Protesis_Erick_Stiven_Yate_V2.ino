@@ -181,7 +181,7 @@ void loop() {
     analogWrite(greenPin, 0);               //INDICADOR LED RGB EN ROJO
     analogWrite(bluePin, 0);
     
-    Serial.println("NIVEL 3 - FLEXION DE MUÑECA");     //REPORTE DEL ESTADO POR SERIAL
+    Serial.println("NIVEL 4 - EXTENSION DE MUÑECA");     //REPORTE DEL ESTADO POR SERIAL
     
     delay(5);
   }
