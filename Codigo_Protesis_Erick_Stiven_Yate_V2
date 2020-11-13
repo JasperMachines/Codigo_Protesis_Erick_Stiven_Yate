@@ -1,9 +1,5 @@
 
 
-
-//
-
-
 #include <Servo.h>
 
 //////////////// DECLARACION DE ACTUADORES/MOTORES 
