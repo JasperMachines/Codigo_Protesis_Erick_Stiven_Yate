@@ -3,9 +3,13 @@
 #include <Servo.h>
 
 //////////////// DECLARACION DE ACTUADORES/MOTORES 
+
 Servo muneca;
-Servo indice;                  //Declaración de servos
-Servo anular;
+
+Servo pulgar;
+Servo indice;                  //DECLARACION DE SERVOS PARA MOVIMIENTO DE DEDOS Y MUÑECA
+Servo medio;
+Servo anular_menique;
 
 /////////////// ASIGNACION DE PINES PARA LED RGB INDICADOR
 
@@ -51,13 +55,17 @@ void setup() {
   pinMode(greenPin, OUTPUT);                   //ASIGNACION DE PINES PARA LED RGB INDICADOR
   pinMode(bluePin, OUTPUT);
 
-  muneca.attach(4);
-  indice.attach(2);                            //ASIGNACION DE PINES DE SALIDA PARA SERVOS
-  anular.attach(3);
-
+  muneca.attach(2);
+  pulgar.attach(4); 
+  indice.attach(6);                            //ASIGNACION DE PINES DE SALIDA PARA SERVOS
+  medio.attach(8);
+  anular_menique.attach(10);
+  
   Serial.begin(9600);                          //COMUNICACION SERIAL PARA DEBUG
 
 }
+
+/////////////// EJECUCION DE PROGRAMA PRINCIPAL
 
 void loop() {
 
@@ -73,92 +81,107 @@ void loop() {
 
 /////////////// SE AMPLIFICA LA SEÑAL 10 VECES PARA HACER MAS FACIL EL PROCESADO DE LA MISMA
 
-  sensor = map((total / numReadings), 1023, 0, 0, 10023);   
+  sensor = map((total / numReadings), 1023, 0, 0, 10000);   
   Serial.println(sensor);                                   // REPORTA EL PROMEDIO CALCULADO POR SERIAL
   
+/////////////// REPOSO - DEDOS EXTENDIDOS - STANDBY - LED VERDE     
 
-  if (sensor < 500 ) {                      //Cuando la lectura del sensor es menor a 500 los dedos se extienden 
-                                            //y la muñeca queda en la ultima posición registrada
+  if (sensor < 500 ) {                        //CUANDO LA LECTURA DEL SENSOR ES MENOR A 500 LOS DEDOS SE EXTIENDEN EN POSICIÓN DE REPOSO
+                                              //Y LA MUÑECA QUEDA EN LA ULTIMA POSICIÓN REGISTRADA
                                             
-    indice.write(posminind);               //POSICIONAMIENTO DE LOS DEDOS Y MUÑECA
-    anular.write(posminanu);
-    muneca.write(posmun);
+    pulgar.write(posminPUL);
+    indice.write(posminIND);                   //POSICIONAMIENTO DE LOS DEDOS 
+    medio.write(posminMED); 
+    anular_menique.write(posminANU);
     
-    analogWrite(redPin, 0);                //INDICADOR LED RGB EN VERDE 
+    muneca.write(posMUN);                       //POSICIONAMIENTO DE MUÑECA A LA ULTIMA REGISTRADA EN LOS NIVELES DE PRESION 3 Y 4
+    
+    analogWrite(redPin, 0);                    //INDICADOR LED RGB EN VERDE 
     analogWrite(greenPin, 255);
     analogWrite(bluePin, 0);
     
+     Serial.println("REPOSO - STANDBY");       //REPORTE DE ESTADO POR PUERTO SERIAL
+    
     delay(50);
   }
+  
+/////////////// NIVEL 1 DE PRESION - POSICIÓN DE AGARRE TIPO TRIPODE - LED EN COLOR AZUL ARTICO
 
-  if (sensor > 500 && sensor < 3000) {         //Cuando la lectura del sensor esta entre 500 y 3000 
-                                               //se acciona el servo correspondiente a los dedos indice y medio
-
-    indice.write(posmaxind);
-    anular.write(posminanu);                     //POSICIONAMIENTO DE LOS DEDOS 
-    muneca.write(posmun);
+  if (sensor > 500 && sensor < 3000) {         //CUANDO LA LECTURA DEL SENSOR ESTA ENTRE 500 Y 3000 
+                                               //SE ACCIONAN LOS SERVOS CORRESPONDIENTS A LOS DEDOS PULGAR, INDICE Y MEDIO 
+    pulgar.write(posmaxPUL);
+    indice.write(posmaxIND);                   //POSICIONAMIENTO DE LOS DEDOS 
+    medio.write(posmaxMED); 
+  //  anular_menique.write(posminANU);     
     
-    Serial.println("INDICE_MEDIO");                 //REPORTE DEL ESTADO POR SERIAL
+    muneca.write(posMUN);                       //POSICIONAMIENTO DE MUÑECA A LA ULTIMA REGISTRADA EN LOS NIVELES DE PRESION 3 Y 4
      
     analogWrite(redPin, 0);
     analogWrite(greenPin, 150);                    //INDICADOR LED RGB EN AZUL ARTICO
     analogWrite(bluePin, 255);
     
+    Serial.println("NIVEL 1 - TRIPODE");              //REPORTE DE ESTADO POR PUERTO SERIAL
+    
     delay(20);
   }
 
+/////////////// NIVEL 2 DE PRESION - POSICIÓN DE AGARRE TIPO CYLINDRICAL/SPHERICAL - LED EN COLOR AZUL PERSIA
 
-  if (sensor > 3500 && sensor < 6500) {        //Cuando la lectura del sensor esta entre 3500 y 6500 
-                                               //se acciona el servo correspondiente a los dedos anular y meñique
-
-    anular.write(posmaxanu);
-    indice.write(posmaxind);                   //POSICIONAMIENTO DE LOS DEDOS 
-    muneca.write(posmun);
+  if (sensor > 3500 && sensor < 6500) {        //CUANDO LA LECTURA DEL SENSOR ESTA ENTRE 3500 Y 6500 
+                                               //SE ACCIONA EL SERVO CORRESPONDIENTE A LOS DEDOS ANULAR Y MEÑIQUE
+    pulgar.write(posmaxPUL);
+    indice.write(posmaxIND);                   //POSICIONAMIENTO DE LOS DEDOS 
+    medio.write(posmaxMED); 
+    anular_menique.write(posmaxANU); 
     
-    Serial.println("ANULAR_MEÑIQUE");          //REPORTE DEL ESTADO POR SERIAL
+    muneca.write(posMUN);                       //POSICIONAMIENTO DE MUÑECA A LA ULTIMA REGISTRADA EN LOS NIVELES DE PRESION 3 Y 4
     
     analogWrite(redPin, 0);
     analogWrite(greenPin, 0);                   //INDICADOR LED RGB EN AZUL PERSIA
     analogWrite(bluePin, 255);
     
+     Serial.println("NIVEL 2 - CYLINDRICAL_ESPHERICAL");          //REPORTE DEL ESTADO POR SERIAL
+     
     delay(20);
   }
+  
+  /////////////// NIVEL 3 DE PRESION - MOVIMIENTO DE FLEXION DE MUÑECA - LED EN COLOR AMARILLO
 
-  if (sensor > 8000 && sensor < 9000) {        //Cuando la lectura del sensor esta entre 8000 y 9000 
-                                               //se libera la tension en los dedos y la muñeca gira a la derecha,
-                                               //al detectar una lectura menor se ejecuta el filtro anterior y queda la muñeca estatica
-                                               //al detectar una lectura mayor se ejecuta el filtro siguiente y gira la muñeca a la izquierda 
+  if (sensor > 8000 && sensor < 9000) {        //CUANDO LA LECTURA DEL SENSOR ESTA ENTRE 8000 Y 9000 SE CONSERVA LA POSICION DE LOS DEDOS
+                                               //Y LA MUÑECA VA FLEXIONANDO LENTAMENTE
+                                               //AL DETECTAR UNA LECTURA MENOR SE EJECUTA EL NIVEL ANTERIOR Y LA MUÑECA SE DETIENE
+                                               //AL PERSISTIR EL NIVEL ACTUAL LA MUÑECA CONTINUA FLEXIONANDO HASTA SU POSICION MAXIMA Y SE DETIENE
+                                               //AL DETECTAR UNA LECTURA MAYOR SE EJECUTA EL NIVEL SIGUIENTE Y LA MUÑECA SE EXTIENDE
 
-    indice.write(posminind);
-    anular.write(posminanu);                   //POSICIONAMIENTO DE LOS DEDOS Y GIRO DE MUÑECA
-    constrain(posmun, 0, 90);
-    posmun -= 5;
-    muneca.write(posmun);
+    constrain(posmun, 90, 180);
+    posmun += 5;
     
-    Serial.println("GIRO_DERECHA");             //REPORTE DEL ESTADO POR SERIAL
+    muneca.write(posMUN);                       //POSICIONAMIENTO DE MUÑECA A LA ULTIMA REGISTRADA 
     
     analogWrite(redPin, 255);
     analogWrite(greenPin, 165);                 //INDICADOR LED RGB EN AMARILLO
     analogWrite(bluePin, 0);
     
+    Serial.println("NIVEL 3 - FLEXION DE MUÑECA");     //REPORTE DEL ESTADO POR SERIAL
+    
     delay(5);
   }
-  if (sensor > 9000 ) {                        //Cuando la lectura del sensor esta entre 8000 y 9000 
-                                               //se libera la tension en los dedos y la muñeca gira a la izquierda,
-                                               //al detectar una lectura menor se ejecuta el filtro anterior y gira la muñeca a la izquierda
-                                               //al detectar una lectura mayor, la muñeca llega al punto maximo de giro y se detiene
+  
+  /////////////// NIVEL 4 DE PRESION - MOVIMIENTO DE EXTENSION DE MUÑECA - LED EN COLOR ROJO
+  
+  if (sensor > 9000 ) {                       //CUANDO LA LECTURA DEL SENSOR ES SUPERIOR A 9000 SE CONSERVA LA POSICION DE LOS DEDOS
+                                              //Y LA MUÑECA VA EXTENDIENDOSE LENTAMENTE 
+                                              //AL DETECTAR UNA LECTURA MENOR SE EJECUTA EL NIVEL ANTERIOR Y LA MUÑECA SE FLEXIONA
+                                              //AL PERSISTIR EL NIVEL MAXIMO, LA MUÑECA LLEGA A SU PUNTO MAXIMO Y SE DETIENE
 
-    indice.write(posminind);
-    anular.write(posminanu);                  //POSICIONAMIENTO DE LOS DEDOS Y GIRO DE MUÑECA
-    constrain(posmun, 90, 180);
     posmun += 5;
     muneca.write(posmun);
     
-    Serial.println("GIRO_IZQUIERDA");        //REPORTE DEL ESTADO POR SERIAL
-     
     analogWrite(redPin, 255);
     analogWrite(greenPin, 0);               //INDICADOR LED RGB EN ROJO
     analogWrite(bluePin, 0);
+    
+    Serial.println("NIVEL 3 - FLEXION DE MUÑECA");     //REPORTE DEL ESTADO POR SERIAL
     
     delay(5);
   }
