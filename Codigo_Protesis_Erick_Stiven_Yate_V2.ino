@@ -153,7 +153,7 @@ void loop() {
                                                //AL PERSISTIR EL NIVEL ACTUAL LA MUÑECA CONTINUA FLEXIONANDO HASTA SU POSICION MAXIMA Y SE DETIENE
                                                //AL DETECTAR UNA LECTURA MAYOR SE EJECUTA EL NIVEL SIGUIENTE Y LA MUÑECA SE EXTIENDE
 
-    constrain(posmun, 90, 180);
+    constrain(posMUN, 90, 180);
     posMUN -= 5;
     
     muneca.write(posMUN);                       //POSICIONAMIENTO DE MUÑECA A LA ULTIMA REGISTRADA 
