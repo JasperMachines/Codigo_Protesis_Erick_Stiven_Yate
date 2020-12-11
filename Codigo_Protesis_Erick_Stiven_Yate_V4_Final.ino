@@ -1,4 +1,5 @@
-//Firmware para Prótesis Erick Yate V4
+
+//Firmware para Prótesis Erick Yate V3.0
 //
 //Sensores utilizados: Infrarrojo de proximidad (Actividad Muscular) - Botón pulsador(Selector de posición)
 
@@ -21,16 +22,16 @@ Servo anular_menique;
 
 /////////////// ASIGNACION DE PINES PARA LED RGB INDICADOR
 
-int redPin = 9;         //pin led rojo
-int greenPin = 11;      //pin led verde
-int bluePin = 10;       //pin led azul
+int redPin = 11;         //pin led rojo
+int greenPin = 10;      //pin led verde
+int bluePin = 9;       //pin led azul
 
 int sensor = 0;        //resultado de promedio de señal muscular, variable dinamica. 
 int selector = 0;      //contador del boton selector de posición, variable dinamica. 
 int responsedelay = 5; //modifica la velocidad de respuesta en los servos, mayor valor = mayor velocidad, valor maximo = 30.
 
 ///////BANCO DE DATOS PARA GESTOS  DE LA MANO
-//0 : extiende/relaja los dedos, el led indicador mide la actividad muscular.
+//0 : extiende/relaja los dedos, el led indica la actividad muscular.
 //1 : agarre tip bidigital entre dedos índice y pulgar.
 //2 : agarre tip tridigital entre dedos índice, medio y pulgar.
 //3 : agarre cilìndrico/esferico, flexiona los 5 dedos.
@@ -38,15 +39,15 @@ int responsedelay = 5; //modifica la velocidad de respuesta en los servos, mayor
 
 int posiciones=4;
 ///////////////////////0////1/////2/////3////4////5
-int varmuneca [] = { 90,   90,   90,   90,  90};   //,  90};   //continuar la matriz para mas posiciones
-int varpulgar [] = {  0, -180, -180, -180,   0};   //,   0};
+int varmuneca [] = { 90,   90,   90,   90,   90};   //,  90};   //continuar la matriz para mas posiciones
+int varpulgar [] = {180,    0,    0,    0,   0};   //,   0};
 int varindice [] = {  0,    0,    0,    0,   0};   //,   0};
 int varmedio  [] = {  0,  180,    0,    0,   0};   //,   0};
 int varanular [] = {180,  180,  180, -180,   0};   //,   0};
 
 //////////////////////0////1////2////3////4////5
 int red       [] = {255, 255, 255,   0,   0};   //,   0};
-int green     [] = {100, 100, 255, 100, 255};   //, 100};     //continuar la matriz para mas colores
+int green     [] = {2, 100, 255, 100, 255};   //, 100};     //continuar la matriz para mas colores
 int blue      [] = {255, 100,  10, 255, 255};   //, 255};
 
 /////////////// VARIABLES DE SENSOR DE ACTIVIDAD MUSCULAR Y PARA FILTRADO DE SEÑAL (PROMEDIO DE 10 MUESTRAS)
@@ -66,11 +67,12 @@ void getmusclesignal() {
   if (readIndex >= numReadings) {
     readIndex = 0;
   }
-  sensor = map((total / numReadings), 950, 500, 0, 180);  // Mapea la señal obtenida entre valores no superiores a 180 
+  sensor = map((total / numReadings), 500, 50, 0, 180);  // Mapea la señal obtenida entre valores no superiores a 180 
                                                           // para ser utilizados directamente en los servos
   
   sensor = constrain(sensor, 0, 180);                     // Mantiene los valores de la variable entre 0 y 180
-  Serial.println(sensor);                                 // Reporta la actividad del sensor por puerto serial
+  Serial.println(sensor);                                 // Reporta la lectura filtrada del sensor
+ // Serial.println(analogRead(A3));                         // Reporta la lectura raw del sensor
 }
 
 /////////////// SECUENCIA PRELIMINAR DE ARDUINO
@@ -83,9 +85,9 @@ void setup() {
 
   muneca.attach(2);
   pulgar.attach(12);
-  indice.attach(6);                            //Asignación de pines para control de servo-motores
-  medio.attach(8);
-  anular_menique.attach(3);
+  indice.attach(3);                            //Asignación de pines para control de servo-motores
+  medio.attach(6);
+  anular_menique.attach(8);
 
   Serial.begin(9600);                          //Activa puerto serial para debug.
 
@@ -95,7 +97,7 @@ void loop() {
 
   getmusclesignal();                          //llama a la función de captura de actividad muscular.
                                               //Esta aloja en la variable sensor el resultado de la operación.
-
+delay(10);
   Serial.println(selector);                   //Reporta el estado del selector, variable al presionar el botón.
 
   if (selector == 0) {                        //Se define una rutina de posición relajada, donde los dedos se extienden, 
@@ -138,7 +140,7 @@ void loop() {
 
 if (selector > 3){                                             //delimita la posición 4 para control de flexión/extensión de la muñeca.
 muneca.write(constrain(varmuneca[4] + sensor,0, 180));
-delay(responsedelay); 
+delay(responsedelay*2); 
 }
 
 }
